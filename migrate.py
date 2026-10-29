@@ -225,3 +225,48 @@ def format_materials(materials):
         }]
 
     return result
+
+
+# ---------------------------------------------------------------
+# Phase IV: Rebuild the JSON equipment.
+# ---------------------------------------------------------------
+
+def clean_equipment(record, index):
+    equip_id = clean_text(get_first_key(record, ID_keys))
+
+    if not equip_id:
+        equip_id = f"EQ-{index:03d}"
+
+    equipment_type = clean_text(record.get("type")) or "Unknown"
+
+    maintenance_date = fix_date(
+        get_first_key(record, maintenance_keys)
+    ) or ""
+
+    maintenance_note = clean_text(record.get("notes")) or ""
+
+    return {
+        "equipID": equip_id,
+        "equipmentType": equipment_type,
+        "statusLabel": fix_date(record.get("status")) or "",
+        "maintenance": [{
+            "date": maintenance_date,
+            "note": maintenance_note,
+        }],
+    }
+
+
+def group_equipment(records):
+    grouped = {}
+
+    for index, record in enumerate(records, start=1):
+        equipment = clean_equipment(record, index)
+
+        group_name = (
+            clean_text(record.get("category"))
+            or "Laboratory"
+        )
+
+        grouped.setdefault(group_name, []).append(equipment)
+
+    return grouped
