@@ -1,7 +1,7 @@
 import csv
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import datetime
 
 # ---------------------------------------------------------------
 # Settings
@@ -22,7 +22,10 @@ status_values = {
     False: "offline",
 }
 
-logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(levelname)s: %(message)s"
+)
 logger = logging.getLogger("migrate")
 
 # ---------------------------------------------------------------
@@ -31,13 +34,12 @@ logger = logging.getLogger("migrate")
 
 
 def read_csv(path):
-    with open(path, "r", newline="", encoding="utf-8") as file:
-        reader = csv.DictReader(file)
-        return list(reader)
+    with open(path, "r", newline="", encoding="utf-8-sig") as file:
+        return list(csv.DictReader(file))
 
 
 def read_json(path):
-    with open(path, "r", encoding="utf=8") as file:
+    with open(path, "r", encoding="utf-8") as file:
         return json.load(file)
 
 # ---------------------------------------------------------------
@@ -48,52 +50,53 @@ def read_json(path):
 def clean_text(value):
     if value is None:
         return None
+
     value = str(value).strip()
-    if value == "":
-        return None
-    return value
+    return value or None
 
 
 def fix_name(name):
     name = clean_text(name)
-    if name is None:
-        return None
-    return name.title()
+    return name.title() if name else None
 
 
 def fix_date(value):
     value = clean_text(value)
-    if value is None:
+
+    if not value:
         return None
+
     for date_format in date_formats:
         try:
-            parsed = datetime.strptime(value, date_format).replace(
-                tzinfo=timezone.utc)
-            return parsed.strftime("%Y-%m-%d")
+            return datetime.strptime(
+                value, date_format
+                ).strftime("%Y-%m-%d")
         except ValueError:
-            pass
-        logger.warning("Could not read the date %r, saved as null", value)
-        return None
+            continue
+
+    logger.warning("Could not read the date %r, saved as null", value)
+    return None
 
 
 def split_quantity(value):
     value = clean_text(value)
-    if value is None:
+    if not value:
         return None
 
-    number_part = ""
     position = 0
-    while position < len(value) and (value[position].isdigit()
-                                     or value[position] == "."):
-        number_part += value[position]
+
+    while position < len(value) and (
+        value[position].isdigit() or value[position] == "."
+    ):
         position += 1
+
+    number_part = value[:position]
     unit_part = value[position:].strip().lower()
 
     try:
         number = float(number_part)
     except ValueError:
-        logger.warning("Could not read the quantity %r, saved as null",
-                       value)
+        logger.warning("Could not read the quantity %r", value)
         return None
 
     if number.is_integer():
@@ -108,22 +111,117 @@ def make_slug(name):
     for character in name.lower():
         if character.isalnum():
             slug += character
-        elif not slug.endswith("-"):
+        elif slug and not slug.endswith("-"):
             slug += "-"
+
     return slug.strip("-")
 
 
 def fix_status(value):
     if isinstance(value, str):
         value = value.strip().lower()
+
     if value in status_values:
         return status_values[value]
+
     logger.warning("Unknown status %r, saved as null", value)
     return None
 
 
 def get_first_key(record, keys):
     for key in keys:
-        if key in record:
+        if key in record and record[key] not in (None, ""):
             return record[key]
-        return None
+
+    return None
+
+
+# ---------------------------------------------------------------
+# Phase III: Rebuild the CSV materials.
+# ---------------------------------------------------------------
+
+def clean_reagent(row):
+    return {
+        "name": fix_name(row.get("item_name")),
+        "itemType": "reagent",
+        "quantity": split_quantity(row.get("quantity")),
+        "purchaseDate": fix_date(row.get("purchase_date")) or "",
+        "expiryDate": fix_date(row.get("expiry_date")) or "",
+        "manufacturer": clean_text(row.get("manufacturer")) or "",
+    }
+
+
+def merge_duplicates(reagents):
+    materials = {}
+
+    for reagent in reagents:
+        name = reagent["name"]
+
+        if not name:
+            logger.warning("Skipping material with no name.")
+            continue
+
+        slug = make_slug(name)
+        quantity = reagent["quantity"]
+
+        if slug not in materials:
+            materials[slug] = {
+                "name": name,
+                "itemType": reagent["itemType"],
+                "purchaseDate": reagent["purchaseDate"],
+                "expiryDate": reagent["expiryDate"],
+                "manufacturer": reagent["manufacturer"],
+                "quantity": quantity,
+            }
+            continue
+        existing = materials[slug]
+        existing_quantity = existing["quantity"]
+
+        if quantity is None:
+            continue
+
+        if existing_quantity is None:
+            existing["quantity"] = quantity
+            continue
+
+        if existing_quantity["unit"] != quantity["unit"]:
+            raise ValueError(
+                f"Cannot merge {name}: units differ "
+                f"({existing_quantity['unit']} and {quantity['unit']})"
+            )
+
+        existing_quantity["value"] += quantity["value"]
+
+        logger.info(
+            "Merged duplicate%s: %s %s",
+            name,
+            existing_quantity["value"],
+            existing_quantity["unit"],
+        )
+
+    return materials
+
+
+def add_material_ids(materials):
+    for number, material in enumerate(materials.values(), start=1):
+        material["itemID"] = f"MT-{number:03d}"
+
+    return materials
+
+
+def format_materials(materials):
+    result = {}
+
+    for slug, material in materials.items():
+        quantity = material["quantity"]
+
+        result[slug] = [{
+            "itemID": material["itemID"],
+            "itemType": material["itemType"],
+            "purchaseDate": material["purchaseDate"],
+            "expiryDate": material["expiryDate"],
+            "manufacturer": material["manufacturer"],
+            "quantity": [quantity] if quantity is not None else [],
+        }]
+
+    return result
