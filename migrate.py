@@ -270,3 +270,55 @@ def group_equipment(records):
         grouped.setdefault(group_name, []).append(equipment)
 
     return grouped
+
+
+# ---------------------------------------------------------------
+# Phase V: Build and save the final inventory
+# ---------------------------------------------------------------
+
+
+def main():
+    try:
+        rows = read_csv(csv_file)
+        equipment_records = read_json(json_file)
+
+    except FileNotFoundError as error:
+        logger.error("A legacy file is missing: %s", error)
+        return
+
+    except json.JSONDecodeError as error:
+        logger.error("json file contains invalid JSON: %s", error)
+        return
+
+    try:
+        reagents = [clean_reagent(row) for row in rows]
+        materials = merge_duplicates(reagents)
+        add_material_ids(materials)
+
+        equipment = group_equipment(equipment_records)
+
+        inventory = {
+            "inventory": {
+                "equipment": equipment,
+                "materials": format_materials(materials),
+            }
+        }
+
+        with open(output_file, "w", encoding="utf-8") as file:
+            json.dump(inventory, file, indent=2, ensure_ascii=False)
+            file.write("\n")
+
+    except (ValueError, OSError) as error:
+        logger.error("Migration stopped: %s", error)
+        return
+
+    logger.info(
+        "Saved %d material groups and %d equipment groups to %s",
+        len(materials),
+        len(equipment),
+        output_file,
+    )
+
+
+if __name__ == "__main__":
+    main()
