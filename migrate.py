@@ -9,7 +9,7 @@ from datetime import datetime
 
 csv_file = "legacy_inventory.csv"
 json_file = "legacy_equipment.json"
-output_file = "inventory"
+output_file = "inventory.json"
 date_formats = ["%Y-%m-%d", "%d/%m/%Y"]
 units = {"g": "g", "kg": "kg", "ml": "mL", "l": "L"}
 ID_keys = ["ID", "item_id", "equipment_id"]
@@ -193,7 +193,7 @@ def merge_duplicates(reagents):
         existing_quantity["value"] += quantity["value"]
 
         logger.info(
-            "Merged duplicate%s: %s %s",
+            "Merged duplicate: %s (%s %s)",
             name,
             existing_quantity["value"],
             existing_quantity["unit"],
@@ -248,7 +248,7 @@ def clean_equipment(record, index):
     return {
         "equipID": equip_id,
         "equipmentType": equipment_type,
-        "statusLabel": fix_date(record.get("status")) or "",
+        "statusLabel": fix_status(record.get("status")) or "",
         "maintenance": [{
             "date": maintenance_date,
             "note": maintenance_note,

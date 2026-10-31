@@ -1,1 +1,196 @@
-
+{
+  "inventory": {
+    "equipment": {
+      "Laboratory": [
+        {
+          "equipID": "EQ-001",
+          "equipmentType": "Microscope",
+          "statusLabel": "online",
+          "maintenance": [
+            {
+              "date": "2024-02-18",
+              "note": ""
+            }
+          ]
+        },
+        {
+          "equipID": "EQ-002",
+          "equipmentType": "Centrifuge",
+          "statusLabel": "offline",
+          "maintenance": [
+            {
+              "date": "2023-12-05",
+              "note": "Rotor imbalance detected."
+            }
+          ]
+        },
+        {
+          "equipID": "EQ-003",
+          "equipmentType": "pH Meter",
+          "statusLabel": "online",
+          "maintenance": [
+            {
+              "date": "2024-04-22",
+              "note": ""
+            }
+          ]
+        },
+        {
+          "equipID": "EQ-004",
+          "equipmentType": "Autoclave",
+          "statusLabel": "offline",
+          "maintenance": [
+            {
+              "date": "2024-05-01",
+              "note": "Needs pressure sensor calibration."
+            }
+          ]
+        },
+        {
+          "equipID": "EQ-005",
+          "equipmentType": "Magnetic Stirrer",
+          "statusLabel": "online",
+          "maintenance": [
+            {
+              "date": "2024-07-15",
+              "note": ""
+            }
+          ]
+        },
+        {
+          "equipID": "EQ-006",
+          "equipmentType": "Spectrophotometer",
+          "statusLabel": "online",
+          "maintenance": [
+            {
+              "date": "2024-06-30",
+              "note": ""
+            }
+          ]
+        }
+      ]
+    },
+    "materials": {
+      "sodium-chloride": [
+        {
+          "itemID": "MT-001",
+          "itemType": "reagent",
+          "purchaseDate": "2023-01-15",
+          "expiryDate": "2028-01-15",
+          "manufacturer": "Sigma-Aldrich",
+          "quantity": [
+            {
+              "value": 700,
+              "unit": "g"
+            }
+          ]
+        }
+      ],
+      "hydrochloric-acid": [
+        {
+          "itemID": "MT-002",
+          "itemType": "reagent",
+          "purchaseDate": "2022-11-20",
+          "expiryDate": "2025-11-20",
+          "manufacturer": "Merck",
+          "quantity": [
+            {
+              "value": 1,
+              "unit": "L"
+            }
+          ]
+        }
+      ],
+      "distilled-water": [
+        {
+          "itemID": "MT-003",
+          "itemType": "reagent",
+          "purchaseDate": "2024-03-10",
+          "expiryDate": "",
+          "manufacturer": "In-House",
+          "quantity": [
+            {
+              "value": 10,
+              "unit": "L"
+            }
+          ]
+        }
+      ],
+      "ethanol": [
+        {
+          "itemID": "MT-004",
+          "itemType": "reagent",
+          "purchaseDate": "2023-05-15",
+          "expiryDate": "2026-05-15",
+          "manufacturer": "Thermo Fisher",
+          "quantity": [
+            {
+              "value": 3500,
+              "unit": "mL"
+            }
+          ]
+        }
+      ],
+      "acetic-acid": [
+        {
+          "itemID": "MT-005",
+          "itemType": "reagent",
+          "purchaseDate": "2024-01-30",
+          "expiryDate": "2026-01-30",
+          "manufacturer": "",
+          "quantity": [
+            {
+              "value": 500,
+              "unit": "mL"
+            }
+          ]
+        }
+      ],
+      "potassium-permanganate": [
+        {
+          "itemID": "MT-006",
+          "itemType": "reagent",
+          "purchaseDate": "2023-07-12",
+          "expiryDate": "2027-07-12",
+          "manufacturer": "Merck",
+          "quantity": [
+            {
+              "value": 250,
+              "unit": "g"
+            }
+          ]
+        }
+      ],
+      "silver-nitrate": [
+        {
+          "itemID": "MT-007",
+          "itemType": "reagent",
+          "purchaseDate": "2022-08-20",
+          "expiryDate": "",
+          "manufacturer": "Alfa Aesar",
+          "quantity": [
+            {
+              "value": 100,
+              "unit": "g"
+            }
+          ]
+        }
+      ],
+      "copper-sulfate": [
+        {
+          "itemID": "MT-008",
+          "itemType": "reagent",
+          "purchaseDate": "2024-06-01",
+          "expiryDate": "2029-06-01",
+          "manufacturer": "Thermo Fisher",
+          "quantity": [
+            {
+              "value": 1,
+              "unit": "kg"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
