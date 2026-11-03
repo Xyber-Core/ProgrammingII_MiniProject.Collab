@@ -80,6 +80,7 @@ def fix_date(value):
 
 def split_quantity(value):
     value = clean_text(value)
+
     if not value:
         return None
 
@@ -95,8 +96,20 @@ def split_quantity(value):
 
     try:
         number = float(number_part)
+
+        if number < 0:
+            raise ValueError("Quantity cannot be negative")
+
     except ValueError:
-        logger.warning("Could not read the quantity %r", value)
+        logger.warning("Invalid Quantity %r saved as null", value)
+        return None
+
+    if not unit_part:
+        logger.warning("Missing unit in quantity %r, saved as null", value)
+        return None
+
+    if unit_part not in units:
+        logger.warning("Unknown unit %r in quantity %r", unit_part, value)
         return None
 
     if number.is_integer():
@@ -145,9 +158,9 @@ def clean_reagent(row):
         "name": fix_name(row.get("item_name")),
         "itemType": "reagent",
         "quantity": split_quantity(row.get("quantity")),
-        "purchaseDate": fix_date(row.get("purchase_date")) or "",
-        "expiryDate": fix_date(row.get("expiry_date")) or "",
-        "manufacturer": clean_text(row.get("manufacturer")) or "",
+        "purchaseDate": fix_date(row.get("purchase_date")),
+        "expiryDate": fix_date(row.get("expiry_date")),
+        "manufacturer": clean_text(row.get("manufacturer")),
     }
 
 
@@ -161,11 +174,11 @@ def merge_duplicates(reagents):
             logger.warning("Skipping material with no name.")
             continue
 
-        slug = make_slug(name)
+        normalized_name = name.casefold()
         quantity = reagent["quantity"]
 
-        if slug not in materials:
-            materials[slug] = {
+        if normalized_name not in materials:
+            materials[normalized_name] = {
                 "name": name,
                 "itemType": reagent["itemType"],
                 "purchaseDate": reagent["purchaseDate"],
@@ -174,10 +187,12 @@ def merge_duplicates(reagents):
                 "quantity": quantity,
             }
             continue
-        existing = materials[slug]
+
+        existing = materials[normalized_name]
         existing_quantity = existing["quantity"]
 
         if quantity is None:
+            logger.warning("Skipping missing quantity for duplicate %s", name)
             continue
 
         if existing_quantity is None:
@@ -203,8 +218,19 @@ def merge_duplicates(reagents):
 
 
 def add_material_ids(materials):
-    for number, material in enumerate(materials.values(), start=1):
-        material["itemID"] = f"MT-{number:03d}"
+    used_ids = set()
+
+    for material in materials.values():
+        base_id = make_slug(material["name"])
+        material_id = base_id
+        suffix = 2
+
+        while material_id in used_ids:
+            material_id = f"{base_id}-{suffix}"
+            suffix += 1
+
+        material["id"] = material_id
+        used_ids.add(material_id)
 
     return materials
 
@@ -212,17 +238,18 @@ def add_material_ids(materials):
 def format_materials(materials):
     result = {}
 
-    for slug, material in materials.items():
-        quantity = material["quantity"]
+    for material in materials.values():
+        material_id = material["id"]
 
-        result[slug] = [{
-            "itemID": material["itemID"],
+        result[material_id] = {
+            "id": material_id,
+            "name": material["name"],
             "itemType": material["itemType"],
             "purchaseDate": material["purchaseDate"],
             "expiryDate": material["expiryDate"],
             "manufacturer": material["manufacturer"],
-            "quantity": [quantity] if quantity is not None else [],
-        }]
+            "quantity": material["quantity"]
+        }
 
     return result
 
@@ -237,18 +264,20 @@ def clean_equipment(record, index):
     if not equip_id:
         equip_id = f"EQ-{index:03d}"
 
-    equipment_type = clean_text(record.get("type")) or "Unknown"
+    equipment_type = clean_text(record.get("type"))
 
     maintenance_date = fix_date(
         get_first_key(record, maintenance_keys)
-    ) or ""
+    )
 
-    maintenance_note = clean_text(record.get("notes")) or ""
+    maintenance_note = clean_text(record.get("notes"))
 
     return {
-        "equipID": equip_id,
-        "equipmentType": equipment_type,
-        "statusLabel": fix_status(record.get("status")) or "",
+        "id": equip_id,
+        "itemType": "equipment",
+        "name": equipment_type,
+        "location": clean_text(record.get("location")),
+        "statusLabel": fix_status(record.get("status")),
         "maintenance": [{
             "date": maintenance_date,
             "note": maintenance_note,
@@ -258,13 +287,25 @@ def clean_equipment(record, index):
 
 def group_equipment(records):
     grouped = {}
+    used_ids = set()
 
     for index, record in enumerate(records, start=1):
         equipment = clean_equipment(record, index)
 
+        base_id = equipment["id"]
+        equip_id = base_id
+        suffix = 2
+
+        while equip_id in used_ids:
+            equip_id = f"{base_id}-{suffix}"
+            suffix += 1
+
+        equipment["id"] = equip_id
+        used_ids.add(equip_id)
+
         group_name = (
             clean_text(record.get("category"))
-            or "Laboratory"
+            or "Laboratory Equipment"
         )
 
         grouped.setdefault(group_name, []).append(equipment)
