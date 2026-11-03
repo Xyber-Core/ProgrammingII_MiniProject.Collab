@@ -47,3 +47,36 @@ class Reagent(InventoryItem):
         }
 
 
+class Equipment(InventoryItem):
+    """Represent laboratory equipment."""
+
+    def __init__(
+            self,item_id, name, location, status,
+            last_maintenance_date, notes
+    ):
+        super().__init__(item_id, name ,"equipment")
+        self.location = location
+        self.notes = notes
+        self.last_maintenance_date = last_maintenance_date
+        self.notes = notes
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "type": self.type,
+            "name": self.name,
+            "location": self.location,
+            "status": self.status,
+            "last_maintenance_date": self.last_maintenance_date,
+            "notes": self.notes,
+
+        }
+
+    def parse_date(value):
+        """convert an 150 date string in to a date object."""
+        if not value:
+            return None
+
+        return datetime.strptime(value, "%y-%m-%d").date()
+
+
