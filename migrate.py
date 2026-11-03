@@ -15,6 +15,25 @@ units = {"g": "g", "kg": "kg", "ml": "mL", "l": "L"}
 ID_keys = ["ID", "item_id", "equipment_id"]
 maintenance_keys = ["last_maintenance", "last_maintenance_date"]
 
+materials_categories = {
+    "sodium chloride": "Chemicals",
+    "hydrochloric acid": "Acids",
+    "distilled water": "Liquids",
+    "ethanol": "Liquids",
+    "acetic acid": "Acids",
+    "potassium permanganate": "Chemicals",
+    "silver nitrate": "Chemicals",
+    "copper sulfate": "Chemicals",
+}
+
+equipment_categories = {
+    "centrifuge": "Laboratory Equipment",
+    "microscope": "Optical Equipment",
+    "spectrophotometer": "Optical Equipment",
+    "magnetic stirrer": "Laboratory Equipment",
+    "ph meter": "Laboratory Equipment",
+    "autoclave": "Sterilization Equipment",
+}
 status_values = {
     "online": "online",
     "offline": "offline",
@@ -154,8 +173,16 @@ def get_first_key(record, keys):
 # ---------------------------------------------------------------
 
 def clean_reagent(row):
+    name = fix_name(row.get("item_name"))
+
+    category = materials_categories.get(
+        name.casefold() if name else "",
+        "Uncategorized"
+    )
+
     return {
-        "name": fix_name(row.get("item_name")),
+        "name": name,
+        "category": category,
         "itemType": "reagent",
         "quantity": split_quantity(row.get("quantity")),
         "purchaseDate": fix_date(row.get("purchase_date")),
@@ -180,6 +207,7 @@ def merge_duplicates(reagents):
         if normalized_name not in materials:
             materials[normalized_name] = {
                 "name": name,
+                "category": reagent["category"],
                 "itemType": reagent["itemType"],
                 "purchaseDate": reagent["purchaseDate"],
                 "expiryDate": reagent["expiryDate"],
@@ -240,8 +268,11 @@ def format_materials(materials):
 
     for material in materials.values():
         material_id = material["id"]
+        category = material["category"]
 
-        result[material_id] = {
+        result.setdefault(category, {})
+
+        result[category][material_id] = {
             "id": material_id,
             "name": material["name"],
             "itemType": material["itemType"],
@@ -302,10 +333,11 @@ def group_equipment(records):
 
         equipment["id"] = equip_id
         used_ids.add(equip_id)
+        name = equipment["name"]
 
-        group_name = (
-            clean_text(record.get("category"))
-            or "Laboratory Equipment"
+        group_name = equipment_categories.get(
+            name.casefold() if name else "",
+            "Uncategorized"
         )
 
         grouped.setdefault(group_name, []).append(equipment)

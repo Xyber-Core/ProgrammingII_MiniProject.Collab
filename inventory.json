@@ -1,7 +1,7 @@
 {
   "inventory": {
     "equipment": {
-      "Laboratory Equipment": [
+      "Optical Equipment": [
         {
           "id": "EQ-001",
           "itemType": "equipment",
@@ -15,6 +15,21 @@
             }
           ]
         },
+        {
+          "id": "EQ-006",
+          "itemType": "equipment",
+          "name": "Spectrophotometer",
+          "location": "Instrument Room",
+          "statusLabel": "online",
+          "maintenance": [
+            {
+              "date": "2024-06-30",
+              "note": null
+            }
+          ]
+        }
+      ],
+      "Laboratory Equipment": [
         {
           "id": "EQ-002",
           "itemType": "equipment",
@@ -42,19 +57,6 @@
           ]
         },
         {
-          "id": "EQ-004",
-          "itemType": "equipment",
-          "name": "Autoclave",
-          "location": "Sterilization Room",
-          "statusLabel": "offline",
-          "maintenance": [
-            {
-              "date": "2024-05-01",
-              "note": "Needs pressure sensor calibration."
-            }
-          ]
-        },
-        {
           "id": "EQ-005",
           "itemType": "equipment",
           "name": "Magnetic Stirrer",
@@ -66,117 +68,125 @@
               "note": null
             }
           ]
-        },
+        }
+      ],
+      "Sterilization Equipment": [
         {
-          "id": "EQ-006",
+          "id": "EQ-004",
           "itemType": "equipment",
-          "name": "Spectrophotometer",
-          "location": "Instrument Room",
-          "statusLabel": "online",
+          "name": "Autoclave",
+          "location": "Sterilization Room",
+          "statusLabel": "offline",
           "maintenance": [
             {
-              "date": "2024-06-30",
-              "note": null
+              "date": "2024-05-01",
+              "note": "Needs pressure sensor calibration."
             }
           ]
         }
       ]
     },
     "materials": {
-      "sodium-chloride": {
-        "id": "sodium-chloride",
-        "name": "Sodium Chloride",
-        "itemType": "reagent",
-        "purchaseDate": "2023-01-15",
-        "expiryDate": "2028-01-15",
-        "manufacturer": "Sigma-Aldrich",
-        "quantity": {
-          "value": 700,
-          "unit": "g"
+      "Chemicals": {
+        "sodium-chloride": {
+          "id": "sodium-chloride",
+          "name": "Sodium Chloride",
+          "itemType": "reagent",
+          "purchaseDate": "2023-01-15",
+          "expiryDate": "2028-01-15",
+          "manufacturer": "Sigma-Aldrich",
+          "quantity": {
+            "value": 700,
+            "unit": "g"
+          }
+        },
+        "potassium-permanganate": {
+          "id": "potassium-permanganate",
+          "name": "Potassium Permanganate",
+          "itemType": "reagent",
+          "purchaseDate": "2023-07-12",
+          "expiryDate": "2027-07-12",
+          "manufacturer": "Merck",
+          "quantity": {
+            "value": 250,
+            "unit": "g"
+          }
+        },
+        "silver-nitrate": {
+          "id": "silver-nitrate",
+          "name": "Silver Nitrate",
+          "itemType": "reagent",
+          "purchaseDate": "2022-08-20",
+          "expiryDate": null,
+          "manufacturer": "Alfa Aesar",
+          "quantity": {
+            "value": 100,
+            "unit": "g"
+          }
+        },
+        "copper-sulfate": {
+          "id": "copper-sulfate",
+          "name": "Copper Sulfate",
+          "itemType": "reagent",
+          "purchaseDate": "2024-06-01",
+          "expiryDate": "2029-06-01",
+          "manufacturer": "Thermo Fisher",
+          "quantity": {
+            "value": 1,
+            "unit": "kg"
+          }
         }
       },
-      "hydrochloric-acid": {
-        "id": "hydrochloric-acid",
-        "name": "Hydrochloric Acid",
-        "itemType": "reagent",
-        "purchaseDate": "2022-11-20",
-        "expiryDate": "2025-11-20",
-        "manufacturer": "Merck",
-        "quantity": {
-          "value": 1,
-          "unit": "L"
+      "Acids": {
+        "hydrochloric-acid": {
+          "id": "hydrochloric-acid",
+          "name": "Hydrochloric Acid",
+          "itemType": "reagent",
+          "purchaseDate": "2022-11-20",
+          "expiryDate": "2025-11-20",
+          "manufacturer": "Merck",
+          "quantity": {
+            "value": 1,
+            "unit": "L"
+          }
+        },
+        "acetic-acid": {
+          "id": "acetic-acid",
+          "name": "Acetic Acid",
+          "itemType": "reagent",
+          "purchaseDate": "2024-01-30",
+          "expiryDate": "2026-01-30",
+          "manufacturer": null,
+          "quantity": {
+            "value": 500,
+            "unit": "mL"
+          }
         }
       },
-      "distilled-water": {
-        "id": "distilled-water",
-        "name": "Distilled Water",
-        "itemType": "reagent",
-        "purchaseDate": "2024-03-10",
-        "expiryDate": null,
-        "manufacturer": "In-House",
-        "quantity": {
-          "value": 10,
-          "unit": "L"
-        }
-      },
-      "ethanol": {
-        "id": "ethanol",
-        "name": "Ethanol",
-        "itemType": "reagent",
-        "purchaseDate": "2023-05-15",
-        "expiryDate": "2026-05-15",
-        "manufacturer": "Thermo Fisher",
-        "quantity": {
-          "value": 3500,
-          "unit": "mL"
-        }
-      },
-      "acetic-acid": {
-        "id": "acetic-acid",
-        "name": "Acetic Acid",
-        "itemType": "reagent",
-        "purchaseDate": "2024-01-30",
-        "expiryDate": "2026-01-30",
-        "manufacturer": null,
-        "quantity": {
-          "value": 500,
-          "unit": "mL"
-        }
-      },
-      "potassium-permanganate": {
-        "id": "potassium-permanganate",
-        "name": "Potassium Permanganate",
-        "itemType": "reagent",
-        "purchaseDate": "2023-07-12",
-        "expiryDate": "2027-07-12",
-        "manufacturer": "Merck",
-        "quantity": {
-          "value": 250,
-          "unit": "g"
-        }
-      },
-      "silver-nitrate": {
-        "id": "silver-nitrate",
-        "name": "Silver Nitrate",
-        "itemType": "reagent",
-        "purchaseDate": "2022-08-20",
-        "expiryDate": null,
-        "manufacturer": "Alfa Aesar",
-        "quantity": {
-          "value": 100,
-          "unit": "g"
-        }
-      },
-      "copper-sulfate": {
-        "id": "copper-sulfate",
-        "name": "Copper Sulfate",
-        "itemType": "reagent",
-        "purchaseDate": "2024-06-01",
-        "expiryDate": "2029-06-01",
-        "manufacturer": "Thermo Fisher",
-        "quantity": {
-          "value": 1,
-          "unit": "kg"
+      "Liquids": {
+        "distilled-water": {
+          "id": "distilled-water",
+          "name": "Distilled Water",
+          "itemType": "reagent",
+          "purchaseDate": "2024-03-10",
+          "expiryDate": null,
+          "manufacturer": "In-House",
+          "quantity": {
+            "value": 10,
+            "unit": "L"
+          }
+        },
+        "ethanol": {
+          "id": "ethanol",
+          "name": "Ethanol",
+          "itemType": "reagent",
+          "purchaseDate": "2023-05-15",
+          "expiryDate": "2026-05-15",
+          "manufacturer": "Thermo Fisher",
+          "quantity": {
+            "value": 3500,
+            "unit": "mL"
+          }
         }
       }
     }
