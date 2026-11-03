@@ -7,7 +7,7 @@ A Python-based inventory management application designed to modernise the Univer
 
 ![Python](https://img.shields.io/badge/Python-3.x-3776AB?logo=python\&logoColor=white)
 ![JSON](https://img.shields.io/badge/Data-JSON-000000?logo=json\&logoColor=white)
-![Status](https://img.shields.io/badge/Status-In%20Development-orange)
+![Status](https://img.shields.io/badge/Status-Completed-green)
 ![Project](https://img.shields.io/badge/Project-Academic%20Assessment-6C63FF)
 
 ---
@@ -16,12 +16,8 @@ A Python-based inventory management application designed to modernise the Univer
 
 * [Overview](#-overview)
 * [Project Objectives](#-project-objectives)
-* [Key Features](#-key-features)
 * [Technology Stack](#-technology-stack)
 * [Project Structure](#-project-structure)
-* [Data Migration](#-data-migration)
-* [Object-Oriented Design](#-object-oriented-design)
-* [Reporting Features](#-reporting-features)
 * [Team Contributions](#-team-contributions)
 * [Assessment Information](#-assessment-information)
 * [License](#-license)
@@ -54,23 +50,6 @@ The primary objectives of this project are to:
 6. **Develop functional reporting** — Use appropriate functional programming constructs to produce useful inventory reports.
 7. **Maintain code quality** — Follow modular design principles and use Git checkpoints to document development.
 
-## ✨ Key Features
-
-*Planned features — implementation status will be updated as development progresses.*
-
-| Feature               | Description                                        | Status     |
-| --------------------- | -------------------------------------------------- | ---------- |
-| Legacy data analysis  | Identify structural and formatting inconsistencies | 🟡 Planned |
-| Unified JSON schema   | Standardise reagent and equipment records          | 🟡 Planned |
-| Data migration        | Clean and migrate both legacy datasets             | 🟡 Planned |
-| Duplicate handling    | Identify and merge duplicate records appropriately | 🟡 Planned |
-| Object-oriented model | Represent inventory items using reusable classes   | 🟡 Planned |
-| Inventory management  | Manage items in memory using suitable collections  | 🟡 Planned |
-| JSON persistence      | Load inventory data and save changes               | 🟡 Planned |
-| Functional reporting  | Generate reports using functional programming      | 🟡 Planned |
-
-> Update the status labels as each feature is implemented and tested.
-
 ## 🛠️ Technology Stack
 
 | Technology | Purpose                                    |
@@ -86,74 +65,29 @@ The primary objectives of this project are to:
 The repository is expected to follow this structure:
 
 ```text
-chemistry-inventory-management/
-│
-├── legacy_inventory.csv    # Legacy reagent dataset
-├── legacy_equipment.json   # Legacy equipment dataset
-│
-├── migrate.py              # Data cleaning and migration
-├── app.py                  # Object-oriented inventory application
-├── inventory.json          # Unified inventory data
-│
-├── README.md               # Project documentation and report
-└── .gitignore              # Files excluded from version control
+.
+└── ProgrammingII_MiniProject.Collab/
+    ├── legacy_equipment.json
+    ├── legacy_inventory.csv
+    ├── LICENSE
+    ├── README.md
+    ├── app.py
+    ├── migrate.py
+    └── inventory.json
 ```
 
 *The structure may be adjusted as the project develops. The legacy files should be included only where permitted by the assessment requirements.*
-
-## 🔄 Data Migration
-
-The `migrate.py` script is responsible for transforming the supplied legacy datasets into a single, consistent JSON inventory.
-
-The migration process is intended to cover:
-
-* Reading the CSV and JSON source files.
-* Normalising field names, casing, and data formats.
-* Cleaning and standardising dates and quantities.
-* Validating and standardising reagent identifiers.
-* Handling missing or invalid values consistently.
-* Identifying and merging duplicate records according to documented rules.
-* Exporting the final unified dataset to `inventory.json`.
-
-The migration rules and unified schema will be documented in the project report.
-
-## 🏗️ Object-Oriented Design
-
-The main application, `app.py`, will use an object-oriented architecture to represent and manage inventory items.
-
-The planned design includes:
-
-* **`InventoryItem`** — An abstract base class defining the common interface and attributes shared by all inventory items.
-* **`Reagent`** — A subclass representing chemical reagents and their specific attributes.
-* **`Equipment`** — A subclass representing laboratory equipment and its specific attributes.
-* **`InventoryManager`** — A class responsible for managing inventory collections, loading data, saving changes, and coordinating inventory operations.
-
-This structure is intended to demonstrate abstraction, inheritance, encapsulation, and polymorphism while keeping the application modular and maintainable.
-
-## 📊 Functional Reporting Features
-
-The application will include two functional reporting methods designed to demonstrate appropriate use of functional programming concepts.
-
-Potential techniques include:
-
-* **Filtering:** Selecting inventory records that match particular conditions.
-* **Mapping:** Transforming inventory data into a report-friendly representation.
-* **Sorting:** Ordering records by relevant attributes.
-* **Lambda expressions:** Defining concise functions for sorting and filtering.
-* **Higher-order functions:** Passing functions into operations that process inventory collections.
-
-The final reporting features will be documented here once the implementation and requirements have been confirmed.
 
 ## 👥 Team Contributions
 
 This project is a collaborative assessment. Each member's contribution will be evidenced through the Git commit history and documented in the final report.
 
-| Team Member | Responsibilities | GitHub Profile                          |
-| ----------- | ---------------- | --------------------------------------- |
-| Riker       | To be confirmed  | [GitHub](https://github.com/Riker-Hoch) |
-| Member 2    | To be confirmed  | [GitHub](https://github.com/)           |
-| Member 3    | To be confirmed  | [GitHub](https://github.com/)           |
-| Member 4    | To be confirmed  | [GitHub](https://github.com/)           |
+| Team Member | Responsibilities      | GitHub Profile                                 |
+| ----------- | --------------------- | ---------------------------------------------- |
+| Riker       | Data Migration Script | [RikerHoch](https://github.com/RikerHoch)         |
+| Shatha      | Object-Oriented Model | [abidalishatha-wq](https://github.com/abidalishatha-wq)  |
+| Fatimah     | Data Migration Script | [fatimahAlmukhtar](https://github.com/fatimahAlmukhtar)  |
+| Caleb       | Functional Reporting  | [caleb44c](https://github.com/caleb444c)         |
 
 *Replace the example rows with your actual team members, assigned tasks, and profile links. Ensure the task-distribution list matches the commit history.*
 
