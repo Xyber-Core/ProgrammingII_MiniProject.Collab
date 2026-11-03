@@ -5,7 +5,7 @@ from datetime import date, datetime,timedelta
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve(). parent
-INVENTORY_FILE_= BASE_DIR / "inventory.jason"
+INVENTORY_FILE= BASE_DIR / "inventory.json"
 
 
 class InventoryItem(ABC):
@@ -44,5 +44,6 @@ class Reagent(InventoryItem):
             "purchase_dat": self.purchase_date,
             "expiry_date": self.expiry_date,
             "manufacturer": self.manufacturer,
-
         }
+
+
