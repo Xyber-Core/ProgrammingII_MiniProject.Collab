@@ -13,7 +13,7 @@ def parse_date(value):
         return None
 
     try:
-        return datetime. strptime(value, "%y-%m-%d").date()
+        return datetime.strptime(value, "%Y-%m-%d").date()
     except (ValueError,TypeError):
       return None
     
