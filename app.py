@@ -239,6 +239,31 @@ class InventoryManager:
         return results
     
 # Method Two: Equipment needing maintenance filter with lambda
+    def equipment_needing_maintenance(self, rerference_date, days=365):
+        """Find equipement that is offline or needs maintenance."""
+        cutoff_date = reference_date - timedelta(days=days)
+
+# Select equipment items
+        equipment = filter(
+            lambda item: isinstance(item, Equipment),
+            self.items,
+        )
+
+        results = []
+
+# Check maintenance dates on each machine 
+        for machine in equipment:
+            last_maintenance = machine.last_maintenance_date
+
+# Check machine's status and maintenance date
+            if machine.status == "offline":
+                results.append(machine)
+            elif last_maintenance is None:
+                results.append(machine)
+            elif last_maintenance <cutoff_date:
+                 results.append(machine)
+    
+        return results
 
 # Method Three: Inventory summary map with lambda
 
