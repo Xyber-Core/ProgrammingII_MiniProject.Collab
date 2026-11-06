@@ -182,36 +182,40 @@ class InventoryManager:
              json.dump(data, file, indent=2, ensure_ascii=False)
              file.write("\n")
 
+# Task 4
+
+# Method One: Expiring reagents filter with lambda
     def expiring_reagents(self, reference_date, days=90):
-        """Find reagent expiring within the specified number of days""" 
-        end_date = reference_date + timedelta(days=days)  
+        """Find reagents expiring within the chosen date window"""
+        end_date = reference_date + timedelta(days=days)
 
-        return [
-             item
-             for item in self.items
-             if (
-                 isinstance(item,Reagent)
-                 and (expiry := parse_date(item.expiry_date)) is not None
-                 and reference_date <= expiry <= end_date
-             )
-        ]
+# Select reagent items
+        reagents = filter(
+                lambda item: isinstance(item, Reagent),
+                self.items,
+        )
 
-    def equipment_needing_maintenance(self, reference_date, days=365): 
-        """find offline equipment with overdue maintenance."""
-        cutoff_date = reference_date - timedelta(days=days)
+        results = []
 
-        return [
-            item
-            for item in self.items
-            if (
-                isinstance(item, Equipment)
-                and (
-                    item.status == "offline"
-                    or item.last_maintenance_date is None
-                    or item.last_maintenance_date < cutoff_date
-                )
-            )
-        ]
+# Check each reagent's expiry date
+        for reagent in reagents:
+            expiry_date = parse_date(reagent.expiry_date)
+
+# Skip missing 
+            if expiry_date is None:
+                continue
+
+# Keep reagents expiring inside the window
+            if reference_date <= expiry_date <= end_date:
+                results.append(reagent)
+
+        return results
+    
+# Method Two: Equipment needing maintenance filter with lambda
+
+# Method Three: Inventory summary map with lambda
+
+# End of Task 4
 
     def list_items(self):
         """Return a summery of all inventory items."""
@@ -252,7 +256,7 @@ if  __name__=="__main__":
         for item in maintenance:
             print(f"- {item.name}: {item.status}")
 
-    except FileNotFoundError:
+    except FileNotFoundError: 
         print(f"Inventory file not found: {INVENTORY_FILE}")
 
     except (json.JSONDecodeError, ValueError) as error:
