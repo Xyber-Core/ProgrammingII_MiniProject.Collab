@@ -1,10 +1,12 @@
 import json
 from abc import ABC, abstractmethod
-from datetime import date, datetime,timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
-
-INVENTORY_FILE = Path(__file__).resolve(). parent / "inventory.json"
+INVENTORY_FILE = Path(__file__).resolve().parent / "inventory.json"
+# ============================================================
+# DATE PARSING
+# ============================================================
 
 
 def parse_date(value):
@@ -14,9 +16,14 @@ def parse_date(value):
 
     try:
         return datetime.strptime(value, "%Y-%m-%d").date()
-    except (ValueError,TypeError):
-      return None
-    
+    except (ValueError, TypeError):
+        return None
+
+
+# ============================================================
+# ABSTRACT INVENTORY ITEM CLASS
+# ============================================================
+
 
 class InventoryItem(ABC):
     """Base class for all inventory items."""
@@ -27,24 +34,29 @@ class InventoryItem(ABC):
         self.category = category
         self.type = item_type
 
-    @abstractmethod 
+    @abstractmethod
     def to_dict(self):
-        """Convert the item into a dictionary.""" 
+        """Convert the item into a dictionary."""
         pass
+
+
+# ============================================================
+# REAGENT CLASS
+# ============================================================
 
 
 class Reagent(InventoryItem):
     """Represent a chemical reagent."""
 
     def __init__(
-            self, 
-            item_id,
-            name,
-            category,
-            quantity,
-            purchase_date,
-            expiry_date,
-            manufacturer,
+        self,
+        item_id,
+        name,
+        category,
+        quantity,
+        purchase_date,
+        expiry_date,
+        manufacturer,
     ):
         super().__init__(item_id, name, category, "reagent")
 
@@ -63,7 +75,11 @@ class Reagent(InventoryItem):
             "expiryDate": self.expiry_date,
             "manufacturer": self.manufacturer,
         }
-    
+
+
+# ============================================================
+# EQUIPMENT CLASS
+# ============================================================
 
 
 class Equipment(InventoryItem):
@@ -72,7 +88,7 @@ class Equipment(InventoryItem):
     def __init__(
         self,
         item_id,
-        name, 
+        name,
         category,
         location,
         status,
@@ -83,16 +99,16 @@ class Equipment(InventoryItem):
         self.location = location
         self.status = status
         self.maintenance = maintenance or []
-        
+
     @property
     def last_maintenance_date(self):
         """Return the most recent recorded maintenance date"""
         dates = [
-            parsed 
-            for record in self. maintenance
+            parsed
+            for record in self.maintenance
             if (parsed := parse_date(record.get("date"))) is not None
         ]
-        
+
         return max(dates) if dates else None
 
     def to_dict(self):
@@ -102,28 +118,32 @@ class Equipment(InventoryItem):
             "name": self.name,
             "location": self.location,
             "statusLabel": self.status,
-            "maintenance":self.maintenance,
+            "maintenance": self.maintenance,
         }
-           
+
+
+# ============================================================
+# INVENTORY MANAGER
+# ============================================================
+
 
 class InventoryManager:
-    """Manage, load, report on, and save inventory items.""" 
+    """Manage, load, report on, and save inventory items."""
 
     def __init__(self, filename=INVENTORY_FILE):
-        self.filename = Path(filename) 
+        self.filename = Path(filename)
         self.item = []
 
     def load(self):
         """load Json data and create python objects."""
         with self.filename.open("r", encoding="utf-8") as file:
-            data = json.load(file)   
+            data = json.load(file)
 
         inventory = data.get("inventory", {})
         self.items = []
 
-        #load materials grouped by category.
+        # load materials grouped by category.
         materials = inventory.get("materials", {})
-       
 
         for category, records in materials.items():
             for record in records.values():
@@ -138,8 +158,7 @@ class InventoryManager:
                 )
                 self.items.append(item)
 
-
-        #load equipment grouped by category.
+        # load equipment grouped by category.
         equipment_groups = inventory.get("equipment", {})
 
         for category, records in equipment_groups.items():
@@ -151,11 +170,15 @@ class InventoryManager:
                     record.get("location"),
                     record.get("statusLabel"),
                     record.get("maintenance"),
-            )
-            self. items.append(item)
+                )
+            self.items.append(item)
 
         return self.items
-        
+
+    # ============================================================
+    # SAVE INVENTORY DATA
+    # ============================================================
+
     def save(self):
         # Save a items using the same nested structure as migrate.py.
         inventory = {
@@ -164,13 +187,13 @@ class InventoryManager:
         }
 
         for item in self.items:
-            if isinstance(item,Reagent):
+            if isinstance(item, Reagent):
                 category = item.category
-                inventory["materials"].setdefault(category,{})
+                inventory["materials"].setdefault(category, {})
 
                 inventory["materials"][category][item.id] = item.to_dict()
 
-            elif isinstance(item, Equipment): 
+            elif isinstance(item, Equipment):
                 category = item.category
                 inventory["equipment"].setdefault(category, [])
 
@@ -179,8 +202,12 @@ class InventoryManager:
         data = {"inventory": inventory}
 
         with self.filename.open("w", encoding="utf-8") as file:
-             json.dump(data, file, indent=2, ensure_ascii=False)
-             file.write("\n")
+            json.dump(data, file, indent=2, ensure_ascii=False)
+            file.write("\n")
+
+    # ========================================================
+    # INVENTORY REPORTING FUNCTIONS
+    # ========================================================
 
 # Task 4
 
@@ -220,12 +247,16 @@ class InventoryManager:
     def list_items(self):
         """Return a summery of all inventory items."""
         return [
-             f"{item.id}: {item.name}({item.category} - {item.type})"
+            f"{item.id}: {item.name}({item.category} - {item.type})"
             for item in self.items
         ]
 
 
-if  __name__=="__main__":
+# ============================================================
+# MAIN PROGRAM EXECUTION
+# ============================================================
+
+if __name__ == "__main__":
     manager = InventoryManager()
 
     try:
@@ -236,7 +267,7 @@ if  __name__=="__main__":
         for item in manager.list_items():
             print(item)
 
-        #Fixed reference date makes testing reproducible.
+        # Fixed reference date makes testing reproducible.
         reference_date = date(2026, 1, 1)
 
         expiring = manager.expiring_reagents(reference_date, days=90)
@@ -256,9 +287,8 @@ if  __name__=="__main__":
         for item in maintenance:
             print(f"- {item.name}: {item.status}")
 
-    except FileNotFoundError: 
+    except FileNotFoundError:
         print(f"Inventory file not found: {INVENTORY_FILE}")
 
     except (json.JSONDecodeError, ValueError) as error:
         print(f"Could not load inventory: {error}")
- 
