@@ -209,41 +209,41 @@ class InventoryManager:
     # INVENTORY REPORTING FUNCTIONS
     # ========================================================
 
-# Task 4
+    # Task 4
 
-# Method One: Expiring reagents filter with lambda
+    # Method One: Expiring reagents filter with lambda
     def expiring_reagents(self, reference_date, days=90):
         """Find reagents expiring within the chosen date window"""
         end_date = reference_date + timedelta(days=days)
 
-# Select reagent items
+        # Select reagent items
         reagents = filter(
-                lambda item: isinstance(item, Reagent),
-                self.items,
+            lambda item: isinstance(item, Reagent),
+            self.items,
         )
 
         results = []
 
-# Check each reagent's expiry date
+        # Check each reagent's expiry date
         for reagent in reagents:
             expiry_date = parse_date(reagent.expiry_date)
 
-# Skip missing 
+            # Skip missing
             if expiry_date is None:
                 continue
 
-# Keep reagents expiring inside the window
+            # Keep reagents expiring inside the window
             if reference_date <= expiry_date <= end_date:
                 results.append(reagent)
 
         return results
-    
-# Method Two: Equipment needing maintenance filter with lambda
-    def equipment_needing_maintenance(self, rerference_date, days=365):
-        """Find equipement that is offline or needs maintenance."""
+
+    # Method Two: Equipment needing maintenance filter with lambda
+    def equipment_needing_maintenance(self, reference_date, days=365):
+        """Find equipment that is offline or needs maintenance."""
         cutoff_date = reference_date - timedelta(days=days)
 
-# Select equipment items
+        # Select equipment items
         equipment = filter(
             lambda item: isinstance(item, Equipment),
             self.items,
@@ -251,23 +251,23 @@ class InventoryManager:
 
         results = []
 
-# Check maintenance dates on each machine 
+        # Check maintenance dates on each machine
         for machine in equipment:
             last_maintenance = machine.last_maintenance_date
 
-# Check machine's status and maintenance date
+            # Check machine's status and maintenance date
             if machine.status == "offline":
                 results.append(machine)
             elif last_maintenance is None:
                 results.append(machine)
-            elif last_maintenance <cutoff_date:
-                 results.append(machine)
-    
+            elif last_maintenance < cutoff_date:
+                results.append(machine)
+
         return results
 
-# Method Three: Inventory summary map with lambda
+    # Method Three: Inventory summary map with lambda
 
-# End of Task 4
+    # End of Task 4
 
     def list_items(self):
         """Return a summery of all inventory items."""
