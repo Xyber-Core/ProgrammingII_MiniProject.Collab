@@ -41,10 +41,7 @@ status_values = {
     False: "offline",
 }
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(levelname)s: %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger("migrate")
 
 # ---------------------------------------------------------------
@@ -60,6 +57,7 @@ def read_csv(path):
 def read_json(path):
     with open(path, "r", encoding="utf-8") as file:
         return json.load(file)
+
 
 # ---------------------------------------------------------------
 # Phase II: Small helper functions, one for each cleaning rule.
@@ -87,9 +85,7 @@ def fix_date(value):
 
     for date_format in date_formats:
         try:
-            return datetime.strptime(
-                value, date_format
-                ).strftime("%Y-%m-%d")
+            return datetime.strptime(value, date_format).strftime("%Y-%m-%d")
         except ValueError:
             continue
 
@@ -172,12 +168,12 @@ def get_first_key(record, keys):
 # Phase III: Rebuild the CSV materials.
 # ---------------------------------------------------------------
 
+
 def clean_reagent(row):
     name = fix_name(row.get("item_name"))
 
     category = materials_categories.get(
-        name.casefold() if name else "",
-        "Uncategorized"
+        name.casefold() if name else "", "Uncategorized"
     )
 
     return {
@@ -279,7 +275,7 @@ def format_materials(materials):
             "purchaseDate": material["purchaseDate"],
             "expiryDate": material["expiryDate"],
             "manufacturer": material["manufacturer"],
-            "quantity": material["quantity"]
+            "quantity": material["quantity"],
         }
 
     return result
@@ -289,6 +285,7 @@ def format_materials(materials):
 # Phase IV: Rebuild the JSON equipment.
 # ---------------------------------------------------------------
 
+
 def clean_equipment(record, index):
     equip_id = clean_text(get_first_key(record, ID_keys))
 
@@ -297,9 +294,7 @@ def clean_equipment(record, index):
 
     equipment_type = clean_text(record.get("type"))
 
-    maintenance_date = fix_date(
-        get_first_key(record, maintenance_keys)
-    )
+    maintenance_date = fix_date(get_first_key(record, maintenance_keys))
 
     maintenance_note = clean_text(record.get("notes"))
 
@@ -309,10 +304,12 @@ def clean_equipment(record, index):
         "name": equipment_type,
         "location": clean_text(record.get("location")),
         "statusLabel": fix_status(record.get("status")),
-        "maintenance": [{
-            "date": maintenance_date,
-            "note": maintenance_note,
-        }],
+        "maintenance": [
+            {
+                "date": maintenance_date,
+                "note": maintenance_note,
+            }
+        ],
     }
 
 
@@ -336,8 +333,7 @@ def group_equipment(records):
         name = equipment["name"]
 
         group_name = equipment_categories.get(
-            name.casefold() if name else "",
-            "Uncategorized"
+            name.casefold() if name else "", "Uncategorized"
         )
 
         grouped.setdefault(group_name, []).append(equipment)
