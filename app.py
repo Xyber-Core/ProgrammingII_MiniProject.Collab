@@ -266,6 +266,15 @@ class InventoryManager:
         return results
 
     # Method Three: Inventory summary map with lambda
+    def inventory_summary(self):
+        """Return a short summary of every inventory item"""
+    # Create a line of text for each item
+        results = map(
+            lambda item: f"{item.id}: {item.name} ({item.type})",
+            self.items,
+        )
+
+        return list(results)
 
     # End of Task 4
 
@@ -288,8 +297,8 @@ if __name__ == "__main__":
         manager.load()
 
         print(f"loaded {len(manager.items)} inventory items.\n")
-
-        for item in manager.list_items():
+# Run Method Three:
+        for item in manager.inventory_summary():
             print(item)
 
         # Fixed reference date makes testing reproducible.
