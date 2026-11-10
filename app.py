@@ -66,6 +66,7 @@ class Reagent(InventoryItem):
         self.manufacturer = manufacturer
 
     def to_dict(self):
+        """Return the reagent as a dictionary."""
         return {
             "id": self.id,
             "name": self.name,
@@ -112,9 +113,10 @@ class Equipment(InventoryItem):
         return max(dates) if dates else None
 
     def to_dict(self):
+        """Return the equipment as a dictionary."""
         return {
             "id": self.id,
-            "item type": "equipment",
+            "itemType": "equipment",
             "name": self.name,
             "location": self.location,
             "statusLabel": self.status,
@@ -132,7 +134,7 @@ class InventoryManager:
 
     def __init__(self, filename=INVENTORY_FILE):
         self.filename = Path(filename)
-        self.item = []
+        self.items = []
 
     def load(self):
         """load Json data and create python objects."""
@@ -171,7 +173,7 @@ class InventoryManager:
                     record.get("statusLabel"),
                     record.get("maintenance"),
                 )
-            self.items.append(item)
+                self.items.append(item)
 
         return self.items
 
@@ -180,6 +182,7 @@ class InventoryManager:
     # ============================================================
 
     def save(self):
+        """Save the inventory items to the JSON"""
         # Save a items using the same nested structure as migrate.py.
         inventory = {
             "equipment": {},
