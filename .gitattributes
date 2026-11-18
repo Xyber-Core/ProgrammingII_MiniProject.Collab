@@ -1,3 +1,5 @@
-# Force SQL, JSON, and configurations to show up in the color bar
+# Include Python, JSON, CSV and SQL in GitHub language statistics
+*.py linguist-detectable=true
 *.json linguist-detectable=true
 *.csv linguist-detectable=true
+*.sql linguist-detectable=true
