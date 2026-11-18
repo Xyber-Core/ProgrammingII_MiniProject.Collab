@@ -1,4 +1,6 @@
 import json
+import os
+import tempfile
 from abc import ABC, abstractmethod
 from datetime import date, datetime, timedelta
 from pathlib import Path
@@ -134,7 +136,48 @@ class InventoryManager:
 
     def __init__(self, filename=INVENTORY_FILE):
         self.filename = Path(filename)
-        self.items = []
+        self.items = {}
+        self.equipment_categories = []
+        self.material_categories = []
+
+    def add_item(self, item):
+        """Add an inventory item with a unique, non-empty ID."""
+        if not isinstance(item, InventoryItem):
+            raise TypeError("Expected an InventoryItem")
+        if not item.id:
+            raise ValueError("Item ID must not be empty")
+        if item.id in self.items:
+            raise ValueError(f"The ID {item.id} already exists")
+        self.items[item.id] = item
+
+    def find_item(self, item_id):
+        """Return an item by ID, or None if it is absent."""
+        return self.items.get(item_id)
+
+    def update_item(self, item_id, **changes):
+        """Update an item's fields while keeping its ID and type."""
+        item = self.find_item(item_id)
+        if item is None:
+            raise KeyError(f"Unkown item ID: {item_id}")
+
+        allowed = {"name", "category"}
+        if isinstance(item, Reagent):
+            allowed.update({"quantity", "purchase_date", "expiry_date",
+                            "manufacturer"})
+        else:
+            allowed.update({"location", "status", "maintenance"})
+
+        for field in changes:
+            if field not in allowed:
+                raise ValueError(f"Field cannot be updated: {field}")
+
+        for field, value in changes.items():
+            setattr(item, field, value)
+        return item
+
+    def remove_item(self, item_id):
+        """Remove an item by ID, or None if it is absent."""
+        return self.items.pop(item_id, None)
 
     def load(self):
         """load Json data and create python objects."""
@@ -142,9 +185,11 @@ class InventoryManager:
             data = json.load(file)
 
         inventory = data.get("inventory", {})
-        self.items = []
+        self.items = {}
+        self.material_categories = list(inventory.get("materials", {}))
+        self.equipment_categories = list(inventory.get("equipment", {}))
 
-        # load materials grouped by category.
+# load materials grouped by category.
         materials = inventory.get("materials", {})
 
         for category, records in materials.items():
@@ -158,9 +203,9 @@ class InventoryManager:
                     record.get("expiryDate"),
                     record.get("manufacturer"),
                 )
-                self.items.append(item)
+                self.add_item(item)
 
-        # load equipment grouped by category.
+# load equipment grouped by category.
         equipment_groups = inventory.get("equipment", {})
 
         for category, records in equipment_groups.items():
@@ -173,9 +218,9 @@ class InventoryManager:
                     record.get("statusLabel"),
                     record.get("maintenance"),
                 )
-                self.items.append(item)
+                self.add_item(item)
 
-        return self.items
+        return list(self.items.values())
 
     # ============================================================
     # SAVE INVENTORY DATA
@@ -183,13 +228,13 @@ class InventoryManager:
 
     def save(self):
         """Save the inventory items to the JSON"""
-        # Save a items using the same nested structure as migrate.py.
+# Save a items using the same nested structure as migrate.py.
         inventory = {
-            "equipment": {},
-            "materials": {},
+            "equipment": {name: [] for name in self.equipment_categories},
+            "materials": {name: {} for name in self.material_categories},
         }
 
-        for item in self.items:
+        for item in self.items.values():
             if isinstance(item, Reagent):
                 category = item.category
                 inventory["materials"].setdefault(category, {})
@@ -204,88 +249,81 @@ class InventoryManager:
 
         data = {"inventory": inventory}
 
-        with self.filename.open("w", encoding="utf-8") as file:
-            json.dump(data, file, indent=2, ensure_ascii=False)
-            file.write("\n")
+        temporary_name = None
+        try:
+            with tempfile.NamedTemporaryFile(
+                mode="w", encoding="utf-8", dir=self.filename.parent,
+                prefix=".inventory-", suffix=".tmp", delete=False,
+            ) as file:
+                temporary_name = file.name
+                json.dump(data, file, indent=2, ensure_ascii=False)
+                file.write("\n")
+            os.replace(temporary_name, self.filename)
+        finally:
+            if temporary_name and os.path.exists(temporary_name):
+                os.unlink(temporary_name)
 
     # ========================================================
     # INVENTORY REPORTING FUNCTIONS
     # ========================================================
 
-    # Task 4
+# Task 4
 
-    # Method One: Expiring reagents filter with lambda
+# Method One: Expiring reagents filter with lambda
     def expiring_reagents(self, reference_date, days=90):
         """Find reagents expiring within the chosen date window"""
         end_date = reference_date + timedelta(days=days)
 
         # Select reagent items
         reagents = filter(
-            lambda item: isinstance(item, Reagent),
-            self.items,
+            lambda item: (
+                isinstance(item, Reagent)
+                and (expiry_date := parse_date(item.expiry_date)) is not None
+                and reference_date <= expiry_date <= end_date
+            ),
+            self.items.values(),
         )
 
-        results = []
+        return list(reagents)
 
-        # Check each reagent's expiry date
-        for reagent in reagents:
-            expiry_date = parse_date(reagent.expiry_date)
-
-            # Skip missing
-            if expiry_date is None:
-                continue
-
-            # Keep reagents expiring inside the window
-            if reference_date <= expiry_date <= end_date:
-                results.append(reagent)
-
-        return results
-
-    # Method Two: Equipment needing maintenance filter with lambda
+# Method Two: Equipment needing maintenance filter with lambda
     def equipment_needing_maintenance(self, reference_date, days=365):
         """Find equipment that is offline or needs maintenance."""
         cutoff_date = reference_date - timedelta(days=days)
 
-        # Select equipment items
+# Select equipment items
         equipment = filter(
-            lambda item: isinstance(item, Equipment),
-            self.items,
+            lambda item: (
+                isinstance(item, Equipment)
+                and (
+                    item.status == "offline"
+                    or item.last_maintenance_date is None
+                    or item.last_maintenance_date < cutoff_date
+                )
+            ),
+            self.items.values(),
         )
 
-        results = []
+        return list(equipment)
 
-        # Check maintenance dates on each machine
-        for machine in equipment:
-            last_maintenance = machine.last_maintenance_date
-
-            # Check machine's status and maintenance date
-            if machine.status == "offline":
-                results.append(machine)
-            elif last_maintenance is None:
-                results.append(machine)
-            elif last_maintenance < cutoff_date:
-                results.append(machine)
-
-        return results
-
-    # Method Three: Inventory summary map with lambda
+# Method Three: Inventory summary map with lambda
     def inventory_summary(self):
         """Return a short summary of every inventory item"""
         # Create a line of text for each item
         results = map(
             lambda item: f"{item.id}: {item.name} ({item.type})",
-            self.items,
+            self.items.values(),
         )
 
         return list(results)
 
-    # End of Task 4
+# End of Task 4
 
     def list_items(self):
         """Return a summery of all inventory items."""
         return [
             f"{item.id}: {item.name}({item.category} - {item.type})"
-            for item in self.items
+            for item in self.items.values()
         ]
 
 
@@ -304,7 +342,7 @@ if __name__ == "__main__":
         for item in manager.inventory_summary():
             print(item)
 
-        # Fixed reference date makes testing reproducible.
+ # Fixed reference date makes testing reproducible.
         reference_date = date(2026, 1, 1)
 
         expiring = manager.expiring_reagents(reference_date, days=90)
@@ -324,8 +362,17 @@ if __name__ == "__main__":
         for item in maintenance:
             print(f"- {item.name}: {item.status}")
 
+# Demonstrate saving and reloading a separate copy
+        saved_file = INVENTORY_FILE.with_name("inventory_saved.json")
+        saved_manager = InventoryManager(saved_file)
+        for item in manager.items.values():
+            saved_manager.add_item(item)
+        saved_manager.save()
+        saved_manager.load()
+        print(f"\nSaved and reloaded {len(saved_manager.items)} items.")
+
     except FileNotFoundError:
         print(f"Inventory file not found: {INVENTORY_FILE}")
 
-    except (json.JSONDecodeError, ValueError) as error:
+    except (json.JSONDecodeError, ValueError, KeyError, OSError) as error:
         print(f"Could not load inventory: {error}")

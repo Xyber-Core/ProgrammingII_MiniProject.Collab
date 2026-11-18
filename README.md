@@ -87,7 +87,7 @@ This project is a collaborative assessment. Each member's contribution will be e
 | Riker       | Data Migration Script | [RikerHoch](https://github.com/RikerHoch)         |
 | Shatha      | Object-Oriented Model | [abidalishatha-wq](https://github.com/abidalishatha-wq)  |
 | Fatimah     | Data Migration Script | [fatimahAlmukhtar](https://github.com/fatimahAlmukhtar)  |
-| Caleb       | Functional Reporting  | [caleb44c](https://github.com/caleb444c)         |
+| Caleb       | Functional Reporting  | [caleb444c](https://github.com/caleb444c)         |
 
 *Replace the example rows with your actual team members, assigned tasks, and profile links. Ensure the task-distribution list matches the commit history.*
 
