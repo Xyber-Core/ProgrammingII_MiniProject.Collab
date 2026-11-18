@@ -1,5 +1,5 @@
-"""migrate.py is responsible for moving as well
-as repairing the old broken data to a new unified json schema"""
+"""Migrate legacy inventory data into unified JSON schema."""
+
 import csv
 import json
 import logging
@@ -20,7 +20,7 @@ UNITS = {"g": "g", "kg": "kg", "ml": "mL", "l": "L"}
 ID_KEYS = ["ID", "item_id", "equipment_id"]
 MAINTENANCE_KEYS = ["last_maintenance", "last_maintenance_date"]
 
-MATERIALS_CATEGORIES = {
+MAT_CATEGORIES = {
     "sodium chloride": "Chemicals",
     "hydrochloric acid": "Acids",
     "distilled water": "Liquids",
@@ -31,7 +31,7 @@ MATERIALS_CATEGORIES = {
     "copper sulfate": "Chemicals",
 }
 
-EQUIPMENT_CATEGORIES = {
+EQUIP_CATEGORIES = {
     "centrifuge": "Laboratory Equipment",
     "microscope": "Optical Equipment",
     "spectrophotometer": "Optical Equipment",
@@ -49,29 +49,25 @@ STATUS_VALUES = {
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 LOGGER = logging.getLogger("migrate")
 
-# ---------------------------------------------------------------
-# Phase I: Read the two outdated files.
-# ---------------------------------------------------------------
+# PHASE I: READ THE TWO OUTDATED FILES. =======================================
 
 
 def read_csv(path):
-    """Reads a CSV file and returns a list of dictionaries."""
+    """Read a CSV file and return a list of dictionaries."""
     with open(path, "r", newline="", encoding="utf-8-sig") as file:
         return list(csv.DictReader(file))
 
 
 def read_json(path):
-    """Reads a JSON file and returns the parsed data."""
+    """Read a JSON file and return the parsed data."""
     with open(path, "r", encoding="utf-8") as file:
         return json.load(file)
 
-
-# ---------------------------------------------------------------
-# Phase II: Small helper functions, one for each cleaning rule.
-# ---------------------------------------------------------------
+# PHASE II: SMALL HELPER FUNCTIONS, ONE FOR EACH CLEANING RULE. ===============
 
 
 def clean_text(value):
+    """Remove unnecessary whitespace and handle missing values."""
     if value is None:
         return None
     value = str(value).strip()
@@ -79,11 +75,13 @@ def clean_text(value):
 
 
 def fix_name(name):
+    """Normalize a reagent name into title case."""
     name = clean_text(name)
     return name.title() if name else None
 
 
 def fix_date(value):
+    """Convert supported date formats into ISO 8601 format."""
     value = clean_text(value)
     if not value:
         return None
@@ -97,6 +95,7 @@ def fix_date(value):
 
 
 def split_quantity(value):
+    """Separate a quantity into its numeric value and measurement unit."""
     value = clean_text(value)
     if not value:
         return None
@@ -130,6 +129,7 @@ def split_quantity(value):
 
 
 def make_slug(name):
+    """Generate a URL-friendly identifier from an item name."""
     slug = ""
     for character in name.lower():
         if character.isalnum():
@@ -140,6 +140,7 @@ def make_slug(name):
 
 
 def fix_status(value):
+    """Convert equipment status values into consistent labels."""
     if isinstance(value, str):
         value = value.strip().lower()
     if isinstance(value, (bool, str)) and value in STATUS_VALUES:
@@ -149,20 +150,19 @@ def fix_status(value):
 
 
 def get_first_key(record, keys):
+    """Find the first available record value."""
     for key in keys:
         if key in record and record[key] not in (None, ""):
             return record[key]
     return None
 
-
-# ---------------------------------------------------------------
-# Phase III: Rebuild the CSV materials.
-# ---------------------------------------------------------------
+# PHASE III: REBUILD THE CSV MATERIALS. =======================================
 
 
 def clean_reagent(row):
+    """Clean and standardize a reagent record from the CSV file."""
     name = fix_name(row.get("item_name"))
-    category = MATERIALS_CATEGORIES.get(
+    category = MAT_CATEGORIES.get(
         name.casefold() if name else "", "Uncategorized"
     )
     return {
@@ -177,6 +177,7 @@ def clean_reagent(row):
 
 
 def merge_duplicates(reagents):
+    """Merge duplicate reagents by summing their quantities."""
     materials = {}
     for reagent in reagents:
         name = reagent["name"]
@@ -215,6 +216,7 @@ def merge_duplicates(reagents):
 
 
 def add_material_ids(materials):
+    """Generate unique slug identifiers for reagent records."""
     used_ids = set()
     for material in materials.values():
         base_id = make_slug(material["name"])
@@ -229,12 +231,12 @@ def add_material_ids(materials):
 
 
 def format_materials(materials):
+    """Organize reagent records into their JSON category structure."""
     result = {}
     for material in materials.values():
         material_id = material["id"]
         category = material["category"]
-        result.setdefault(category, {})
-        result[category][material_id] = {
+        result.setdefault(category, {})[material_id] = {
             "id": material_id,
             "name": material["name"],
             "itemType": material["itemType"],
@@ -245,13 +247,11 @@ def format_materials(materials):
         }
     return result
 
-
-# ---------------------------------------------------------------
-# Phase IV: Rebuild the JSON equipment.
-# ---------------------------------------------------------------
+# PHASE IV: REBUILD THE JSON EQUIPMENT. ======================================
 
 
 def clean_equipment(record, index):
+    """Clean and standardize an equipment record from the JSON file."""
     equip_id = clean_text(get_first_key(record, ID_KEYS))
     if not equip_id:
         equip_id = f"EQ-{index:03d}"
@@ -270,6 +270,7 @@ def clean_equipment(record, index):
 
 
 def group_equipment(records):
+    """Group equipment records by their assigned category."""
     grouped = {}
     used_ids = set()
     for index, record in enumerate(records, start=1):
@@ -284,24 +285,22 @@ def group_equipment(records):
         used_ids.add(equip_id)
 
         name = equipment["name"]
-        group_name = EQUIPMENT_CATEGORIES.get(
+        group_name = EQUIP_CATEGORIES.get(
             name.casefold() if name else "", "Uncategorized"
         )
         grouped.setdefault(group_name, []).append(equipment)
     return grouped
 
-
-# ---------------------------------------------------------------
-# Phase V: Build and save the final inventory
-# ---------------------------------------------------------------
+# PHASE V: BUILD AND SAVE THE FINAL INVENTORY. ================================
 
 
 def main():
+    """Read, clean, and migrate legacy data into inventory JSON schema."""
     try:
         rows = read_csv(CSV_FILE)
         equipment_records = read_json(JSON_FILE)
         if not isinstance(equipment_records, list):
-            raise ValueError("Equipment must be a JSON format")
+            raise ValueError("Equipment JSON must contain a list of records.")
 
         reagents = [clean_reagent(row) for row in rows]
         materials = merge_duplicates(reagents)
@@ -326,7 +325,7 @@ def main():
         return False
 
     LOGGER.info(
-        "Saved %d material groups and %d equipment groups to %s",
+        "Saved %d reagents and %d equipment items to %s",
         len(materials),
         sum(len(group) for group in equipment.values()),
         OUTPUT_FILE,
