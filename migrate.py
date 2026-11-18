@@ -1,3 +1,5 @@
+"""migrate.py is responsible for moving as well
+as repairing the old broken data to a new unified json schema"""
 import csv
 import json
 import logging
@@ -53,11 +55,13 @@ LOGGER = logging.getLogger("migrate")
 
 
 def read_csv(path):
+    """Reads a CSV file and returns a list of dictionaries."""
     with open(path, "r", newline="", encoding="utf-8-sig") as file:
         return list(csv.DictReader(file))
 
 
 def read_json(path):
+    """Reads a JSON file and returns the parsed data."""
     with open(path, "r", encoding="utf-8") as file:
         return json.load(file)
 
