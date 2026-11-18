@@ -1,0 +1,3 @@
+# Force SQL, JSON, and configurations to show up in the color bar
+*.json linguist-detectable=true
+*.csv linguist-detectable=true
