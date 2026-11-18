@@ -158,12 +158,12 @@ class InventoryManager:
         """Update an item's fields while keeping its ID and type."""
         item = self.find_item(item_id)
         if item is None:
-            raise KeyError(f"Unkown item ID: {item_id}")
+            raise KeyError(f"Unknown item ID: {item_id}")
 
         allowed = {"name", "category"}
         if isinstance(item, Reagent):
-            allowed.update({"quantity", "purchase_date", "expiry_date",
-                            "manufacturer"})
+            allowed.update({"quantity", "purchase_date",
+                            "expiry_date", "manufacturer"})
         else:
             allowed.update({"location", "status", "maintenance"})
 
@@ -189,7 +189,7 @@ class InventoryManager:
         self.material_categories = list(inventory.get("materials", {}))
         self.equipment_categories = list(inventory.get("equipment", {}))
 
-# load materials grouped by category.
+        # load materials grouped by category.
         materials = inventory.get("materials", {})
 
         for category, records in materials.items():
@@ -205,7 +205,7 @@ class InventoryManager:
                 )
                 self.add_item(item)
 
-# load equipment grouped by category.
+        # load equipment grouped by category.
         equipment_groups = inventory.get("equipment", {})
 
         for category, records in equipment_groups.items():
@@ -228,7 +228,7 @@ class InventoryManager:
 
     def save(self):
         """Save the inventory items to the JSON"""
-# Save a items using the same nested structure as migrate.py.
+        # Save a items using the same nested structure as migrate.py.
         inventory = {
             "equipment": {name: [] for name in self.equipment_categories},
             "materials": {name: {} for name in self.material_categories},
@@ -252,8 +252,12 @@ class InventoryManager:
         temporary_name = None
         try:
             with tempfile.NamedTemporaryFile(
-                mode="w", encoding="utf-8", dir=self.filename.parent,
-                prefix=".inventory-", suffix=".tmp", delete=False,
+                mode="w",
+                encoding="utf-8",
+                dir=self.filename.parent,
+                prefix=".inventory-",
+                suffix=".tmp",
+                delete=False,
             ) as file:
                 temporary_name = file.name
                 json.dump(data, file, indent=2, ensure_ascii=False)
@@ -267,9 +271,9 @@ class InventoryManager:
     # INVENTORY REPORTING FUNCTIONS
     # ========================================================
 
-# Task 4
+    # Task 4
 
-# Method One: Expiring reagents filter with lambda
+    # Method One: Expiring reagents filter with lambda
     def expiring_reagents(self, reference_date, days=90):
         """Find reagents expiring within the chosen date window"""
         end_date = reference_date + timedelta(days=days)
@@ -286,12 +290,12 @@ class InventoryManager:
 
         return list(reagents)
 
-# Method Two: Equipment needing maintenance filter with lambda
+    # Method Two: Equipment needing maintenance filter with lambda
     def equipment_needing_maintenance(self, reference_date, days=365):
         """Find equipment that is offline or needs maintenance."""
         cutoff_date = reference_date - timedelta(days=days)
 
-# Select equipment items
+        # Select equipment items
         equipment = filter(
             lambda item: (
                 isinstance(item, Equipment)
@@ -306,7 +310,7 @@ class InventoryManager:
 
         return list(equipment)
 
-# Method Three: Inventory summary map with lambda
+    # Method Three: Inventory summary map with lambda
     def inventory_summary(self):
         """Return a short summary of every inventory item"""
         # Create a line of text for each item
@@ -317,7 +321,7 @@ class InventoryManager:
 
         return list(results)
 
-# End of Task 4
+    # End of Task 4
 
     def list_items(self):
         """Return a summery of all inventory items."""
@@ -342,7 +346,7 @@ if __name__ == "__main__":
         for item in manager.inventory_summary():
             print(item)
 
- # Fixed reference date makes testing reproducible.
+        # Fixed reference date makes testing reproducible.
         reference_date = date(2026, 1, 1)
 
         expiring = manager.expiring_reagents(reference_date, days=90)
@@ -362,7 +366,7 @@ if __name__ == "__main__":
         for item in maintenance:
             print(f"- {item.name}: {item.status}")
 
-# Demonstrate saving and reloading a separate copy
+        # Demonstrate saving and reloading a separate copy
         saved_file = INVENTORY_FILE.with_name("inventory_saved.json")
         saved_manager = InventoryManager(saved_file)
         for item in manager.items.values():

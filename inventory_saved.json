@@ -1,0 +1,194 @@
+{
+  "inventory": {
+    "equipment": {
+      "Optical Equipment": [
+        {
+          "id": "EQ-001",
+          "itemType": "equipment",
+          "name": "Microscope",
+          "location": "Lab A, Bench 3",
+          "statusLabel": "online",
+          "maintenance": [
+            {
+              "date": "2024-02-18",
+              "note": null
+            }
+          ]
+        },
+        {
+          "id": "EQ-006",
+          "itemType": "equipment",
+          "name": "Spectrophotometer",
+          "location": "Instrument Room",
+          "statusLabel": "online",
+          "maintenance": [
+            {
+              "date": "2024-06-30",
+              "note": null
+            }
+          ]
+        }
+      ],
+      "Laboratory Equipment": [
+        {
+          "id": "EQ-002",
+          "itemType": "equipment",
+          "name": "Centrifuge",
+          "location": "Lab B, Bench 1",
+          "statusLabel": "offline",
+          "maintenance": [
+            {
+              "date": "2023-12-05",
+              "note": "Rotor imbalance detected."
+            }
+          ]
+        },
+        {
+          "id": "EQ-003",
+          "itemType": "equipment",
+          "name": "pH Meter",
+          "location": "Lab A, Bench 2",
+          "statusLabel": "online",
+          "maintenance": [
+            {
+              "date": "2024-04-22",
+              "note": null
+            }
+          ]
+        },
+        {
+          "id": "EQ-005",
+          "itemType": "equipment",
+          "name": "Magnetic Stirrer",
+          "location": "Lab A, Bench 3",
+          "statusLabel": "online",
+          "maintenance": [
+            {
+              "date": "2024-07-15",
+              "note": null
+            }
+          ]
+        }
+      ],
+      "Sterilization Equipment": [
+        {
+          "id": "EQ-004",
+          "itemType": "equipment",
+          "name": "Autoclave",
+          "location": "Sterilization Room",
+          "statusLabel": "offline",
+          "maintenance": [
+            {
+              "date": "2024-05-01",
+              "note": "Needs pressure sensor calibration."
+            }
+          ]
+        }
+      ]
+    },
+    "materials": {
+      "Chemicals": {
+        "sodium-chloride": {
+          "id": "sodium-chloride",
+          "name": "Sodium Chloride",
+          "itemType": "reagent",
+          "quantity": {
+            "value": 700,
+            "unit": "g"
+          },
+          "purchaseDate": "2023-01-15",
+          "expiryDate": "2028-01-15",
+          "manufacturer": "Sigma-Aldrich"
+        },
+        "potassium-permanganate": {
+          "id": "potassium-permanganate",
+          "name": "Potassium Permanganate",
+          "itemType": "reagent",
+          "quantity": {
+            "value": 250,
+            "unit": "g"
+          },
+          "purchaseDate": "2023-07-12",
+          "expiryDate": "2027-07-12",
+          "manufacturer": "Merck"
+        },
+        "silver-nitrate": {
+          "id": "silver-nitrate",
+          "name": "Silver Nitrate",
+          "itemType": "reagent",
+          "quantity": {
+            "value": 100,
+            "unit": "g"
+          },
+          "purchaseDate": "2022-08-20",
+          "expiryDate": null,
+          "manufacturer": "Alfa Aesar"
+        },
+        "copper-sulfate": {
+          "id": "copper-sulfate",
+          "name": "Copper Sulfate",
+          "itemType": "reagent",
+          "quantity": {
+            "value": 1,
+            "unit": "kg"
+          },
+          "purchaseDate": "2024-06-01",
+          "expiryDate": "2029-06-01",
+          "manufacturer": "Thermo Fisher"
+        }
+      },
+      "Acids": {
+        "hydrochloric-acid": {
+          "id": "hydrochloric-acid",
+          "name": "Hydrochloric Acid",
+          "itemType": "reagent",
+          "quantity": {
+            "value": 1,
+            "unit": "L"
+          },
+          "purchaseDate": "2022-11-20",
+          "expiryDate": "2025-11-20",
+          "manufacturer": "Merck"
+        },
+        "acetic-acid": {
+          "id": "acetic-acid",
+          "name": "Acetic Acid",
+          "itemType": "reagent",
+          "quantity": {
+            "value": 500,
+            "unit": "mL"
+          },
+          "purchaseDate": "2024-01-30",
+          "expiryDate": "2026-01-30",
+          "manufacturer": null
+        }
+      },
+      "Liquids": {
+        "distilled-water": {
+          "id": "distilled-water",
+          "name": "Distilled Water",
+          "itemType": "reagent",
+          "quantity": {
+            "value": 10,
+            "unit": "L"
+          },
+          "purchaseDate": "2024-03-10",
+          "expiryDate": null,
+          "manufacturer": "In-House"
+        },
+        "ethanol": {
+          "id": "ethanol",
+          "name": "Ethanol",
+          "itemType": "reagent",
+          "quantity": {
+            "value": 3500,
+            "unit": "mL"
+          },
+          "purchaseDate": "2023-05-15",
+          "expiryDate": "2026-05-15",
+          "manufacturer": "Thermo Fisher"
+        }
+      }
+    }
+  }
+}

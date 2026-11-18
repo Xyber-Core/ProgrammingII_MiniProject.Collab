@@ -316,14 +316,15 @@ def main():
             file.write("\n")
 
     except (
-        ValueError, FileNotFoundError, json.JSONDecodeError, OSError
-    ) as error:
+            ValueError, FileNotFoundError, json.JSONDecodeError, OSError
+            ) as error:
         LOGGER.error("Migration stopped: %s", error)
         return False
 
     LOGGER.info(
         "Saved %d material groups and %d equipment groups to %s",
-        len(materials), sum(len(group) for group in equipment.values()),
+        len(materials),
+        sum(len(group) for group in equipment.values()),
         OUTPUT_FILE,
     )
     return True
