@@ -1,6 +1,2 @@
-# Include JSON and CSV in GitHub language statistics
 *.json linguist-language=JSON linguist-detectable
 *.csv linguist-language=CSV linguist-detectable
-
-# Keep Python correctly classified
-*.py linguist-language=Python
