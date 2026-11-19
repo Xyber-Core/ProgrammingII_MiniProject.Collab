@@ -1,3 +1,5 @@
+"""Manage laboratory inventory items, including reagents and equipment."""
+
 import json
 import os
 import tempfile
@@ -12,7 +14,7 @@ INVENTORY_FILE = Path(__file__).resolve().parent / "inventory.json"
 
 
 def parse_date(value):
-    """convert an 150 date string into a date object."""
+    """Convert an ISO date string into a date object."""
     if not value:
         return None
 
@@ -31,6 +33,7 @@ class InventoryItem(ABC):
     """Base class for all inventory items."""
 
     def __init__(self, item_id, name, category, item_type):
+        """Set up the basic details of inventory item."""
         self.id = item_id
         self.name = name
         self.category = category
@@ -60,6 +63,7 @@ class Reagent(InventoryItem):
         expiry_date,
         manufacturer,
     ):
+        """Set up a reagent with its details and dates."""
         super().__init__(item_id, name, category, "reagent")
 
         self.quantity = quantity
@@ -97,6 +101,7 @@ class Equipment(InventoryItem):
         status,
         maintenance,
     ):
+        """Set up equipment with its location and maintenance."""
         super().__init__(item_id, name, category, "equipment")
 
         self.location = location
@@ -105,7 +110,7 @@ class Equipment(InventoryItem):
 
     @property
     def last_maintenance_date(self):
-        """Return the most recent recorded maintenance date"""
+        """Return the most recent recorded maintenance date."""
         dates = [
             parsed
             for record in self.maintenance
@@ -135,6 +140,7 @@ class InventoryManager:
     """Manage, load, report on, and save inventory items."""
 
     def __init__(self, filename=INVENTORY_FILE):
+        """Set up the inventory manager and its storage."""
         self.filename = Path(filename)
         self.items = {}
         self.equipment_categories = []
@@ -180,7 +186,7 @@ class InventoryManager:
         return self.items.pop(item_id, None)
 
     def load(self):
-        """load Json data and create python objects."""
+        """Load Json data and create python objects."""
         with self.filename.open("r", encoding="utf-8") as file:
             data = json.load(file)
 
@@ -227,7 +233,7 @@ class InventoryManager:
     # ============================================================
 
     def save(self):
-        """Save the inventory items to the JSON"""
+        """Save the inventory items to the JSON."""
         # Save a items using the same nested structure as migrate.py.
         inventory = {
             "equipment": {name: [] for name in self.equipment_categories},
@@ -275,7 +281,7 @@ class InventoryManager:
 
     # Method One: Expiring reagents filter with lambda
     def expiring_reagents(self, reference_date, days=90):
-        """Find reagents expiring within the chosen date window"""
+        """Find reagents expiring within the chosen date window."""
         end_date = reference_date + timedelta(days=days)
 
         # Select reagent items
@@ -312,7 +318,7 @@ class InventoryManager:
 
     # Method Three: Inventory summary map with lambda
     def inventory_summary(self):
-        """Return a short summary of every inventory item"""
+        """Return a short summary of every inventory item."""
         # Create a line of text for each item
         results = map(
             lambda item: f"{item.id}: {item.name} ({item.type})",
@@ -324,7 +330,7 @@ class InventoryManager:
     # End of Task 4
 
     def list_items(self):
-        """Return a summery of all inventory items."""
+        """Return a summary of all inventory items."""
         return [
             f"{item.id}: {item.name}({item.category} - {item.type})"
             for item in self.items.values()
@@ -348,7 +354,6 @@ if __name__ == "__main__":
 
         # Fixed reference date makes testing reproducible.
         reference_date = date(2026, 1, 1)
-
         expiring = manager.expiring_reagents(reference_date, days=90)
 
         print("\nReagents expiring within 90 days:")
